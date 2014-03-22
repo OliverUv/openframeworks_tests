@@ -27,7 +27,7 @@ class ofApp : public ofBaseApp{
         ofPlanePrimitive plane;
 
         // To make it easier to draw to fbo in either update() or draw().
-        void draw_to_fbo();
+        void draw_plane_and_update_effect();
 
         int width = 1920;
         int height = 1200;
