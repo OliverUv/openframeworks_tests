@@ -10,18 +10,11 @@ void ofApp::setup(){
     // mismatch problem when using fbo textures. It does not help.
     /* ofDisableArbTex(); */
 
-    shader.load("shadersGL3/shader");
-
-    // We enlarge the plane so it covers half the screen.
-    int plane_width = width * 0.5;
-    int plane_height = height * 0.5;
-    plane.set(plane_width, plane_height, 2, 2, OF_PRIMITIVE_TRIANGLES);
-
     render_buffer.allocate(width, height, GL_RGBA); //RGB or RGBA here makes no difference.
     fx_effect.allocate(width, height);
 }
 
-void ofApp::draw_plane_and_update_effect() {
+void ofApp::draw_rect_to_fbo_and_update_effect() {
     render_buffer.begin();
     {
         ofPushStyle();
@@ -31,12 +24,13 @@ void ofApp::draw_plane_and_update_effect() {
             ofSetColor(35, 75, 75);
             ofRect(0, 0, width, height);
 
-            // Draw a rectangle/plane
-            float cx = width / 2.0;
-            float cy = height / 2.0;
-            ofTranslate(cx, cy); // draw plane in center of screen
-            ofSetColor(ofColor::fromHsb(125, 255, 255)); // make plane teal
-            plane.draw();
+            // Draw a rectangle
+            float xr = width / 4.0;
+            float yr = height / 4.0;
+            float wr = width / 2.0;
+            float hr = height / 2.0;
+            ofSetColor(ofColor::fromHsb(125, 255, 255)); // make rectangle teal
+            ofRect((int)xr, (int)yr, (int)wr, (int)hr);
         }
         ofPopMatrix();
         ofPopStyle();
@@ -56,23 +50,23 @@ void ofApp::update(){
     // If 15, will make ofxBokeh draw nothing.
     fx_effect.setRadius(1.5);
 
-    draw_plane_and_update_effect();
+    draw_rect_to_fbo_and_update_effect();
  } 
 
 //--------------------------------------------------------------
 void ofApp::draw(){
 
-    /* draw_plane_and_update_effect(); */
+    /* draw_rect_to_fbo_and_update_effect(); */
 
     // We use a dark red background to easily see what we have painted ourselves.
     // Sandbox-example uses a black background. That changes nothing.
     ofBackground(70,35,35);
     /* ofBackground(0); */
 
-    // This outputs the plane properly.
+    // This outputs the rectangle properly.
     /* render_buffer.draw(0, 0, width, height); */
 
-    // This outputs the plane properly, so we know that the effect's textures[0]
+    // This outputs the rectangle properly, so we know that the effect's textures[0]
     // is set to contain the render_buffer ofFbo's contents properly.
     fx_effect[0].draw(0, 0, width, height);
 
@@ -85,7 +79,7 @@ void ofApp::draw(){
     // Will draw nothing in top left, top right and bottom left quadrants.
     // Will draw black pixels in lower right quadrant.
     // ofxBloom:
-    // Will draw nothing at all.
+    // Draws a desaturated square in the lower right quadrant.
     // ofxGaussianBlur:
     // Will fill transparent pixels (anything not painted) of the fbo with black.
     // Will draw the fbo unchanged.

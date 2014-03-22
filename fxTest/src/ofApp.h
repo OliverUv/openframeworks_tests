@@ -24,13 +24,10 @@ class ofApp : public ofBaseApp{
         void gotMessage(ofMessage msg);
 
     private:
-        ofShader shader;
-        ofPlanePrimitive plane;
-
         // To make it easier to draw to fbo in either update() or draw().
         // Does not make a difference where it is called from, but is
         // called from update() in sandbox-example.
-        void draw_plane_and_update_effect();
+        void draw_rect_to_fbo_and_update_effect();
 
         int width = 640;
         int height = 480;
