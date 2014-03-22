@@ -2,7 +2,7 @@
 
 #include "ofMain.h"
 #include "ofxBokeh.h"
-#include "ofxBloom.h"
+/* #include "ofxBloom.h" */
 
 class ofApp : public ofBaseApp{
     public:
