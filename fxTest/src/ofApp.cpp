@@ -6,6 +6,10 @@ void ofApp::setup(){
     ofSetLogLevel(OF_LOG_VERBOSE); // Removing this does not make bokeh work.
     ofEnableAlphaBlending();
 
+    // This was proposed as a solution on the forums for a texture/coordinate
+    // mismatch problem when using fbo textures. It does not help.
+    /* ofDisableArbTex(); */
+
     shader.load("shadersGL3/shader");
 
     // We enlarge the plane so it covers half the screen.
