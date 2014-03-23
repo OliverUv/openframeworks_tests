@@ -1,9 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
-/* #include "ofxGaussianBlur.h" */
-#include "ofxBokeh.h"
-/* #include "ofxBloom.h" */
+#include "ofxPassthrough.h"
 
 class ofApp : public ofBaseApp{
     public:
@@ -29,10 +27,8 @@ class ofApp : public ofBaseApp{
         // called from update() in sandbox-example.
         void draw_rect_to_fbo_and_update_effect();
 
-        int width = 640;
-        int height = 480;
-        ofxBokeh fx_effect;
-        /* ofxBloom fx_effect; */
-        /* ofxGaussianBlur fx_effect; */
+        int width = 300;
+        int height = 300;
+        ofxPassthrough fx_pass;
         ofFbo render_buffer;
 };

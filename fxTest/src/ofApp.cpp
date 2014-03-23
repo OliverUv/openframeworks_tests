@@ -3,15 +3,11 @@
 
 void ofApp::setup(){
 
-    ofSetLogLevel(OF_LOG_VERBOSE); // Removing this does not make bokeh work.
+    ofSetLogLevel(OF_LOG_VERBOSE);
     ofEnableAlphaBlending();
 
-    // This was proposed as a solution on the forums for a texture/coordinate
-    // mismatch problem when using fbo textures. It does not help.
-    /* ofDisableArbTex(); */
-
-    render_buffer.allocate(width, height, GL_RGBA); //RGB or RGBA here makes no difference.
-    fx_effect.allocate(width, height);
+    render_buffer.allocate(width, height, GL_RGBA);
+    fx_pass.allocate(width, height);
 }
 
 void ofApp::draw_rect_to_fbo_and_update_effect() {
@@ -20,74 +16,62 @@ void ofApp::draw_rect_to_fbo_and_update_effect() {
         ofPushStyle();
         ofPushMatrix();
         {
-            // Draw a dark-teal background
-            ofSetColor(35, 75, 75);
-            ofRect(0, 0, width, height);
+            // Draw a dark-teal, half transparent background
+            // but don't cover everything
+            ofSetColor(0, 75, 75, 128);
+            ofRect(5, 5, width-10, height-10);
 
-            // Draw a rectangle
+            // Draw an opaque inner teal rectangle
             float xr = width / 4.0;
             float yr = height / 4.0;
             float wr = width / 2.0;
             float hr = height / 2.0;
-            ofSetColor(ofColor::fromHsb(125, 255, 255)); // make rectangle teal
-            ofRect((int)xr, (int)yr, (int)wr, (int)hr);
+            ofSetColor(0, 128, 128);
+            ofRect(xr, yr, wr, hr);
+
+            // And finally a half-transparent white dot. This will
+            // "cut a hole" through our rectangles, allowing us to
+            // see whatever is behind. This is an odd behaviour,
+            // unrelated to ofxFX and our fbo business.
+            ofSetColor(255, 255, 255, 128);
+            ofCircle(width/2, height/2, 30);
+            
         }
         ofPopMatrix();
         ofPopStyle();
     }
     render_buffer.end();
 
-    fx_effect << render_buffer;
-    // This .update() isn't necessary, but is used in sandbox example. It should
-    // be removed from there, though, since .update() is called by the << operator.
-    fx_effect.update();
+    fx_pass << render_buffer;
 }
 
 
 void ofApp::update(){
-    // Comment this out if you're testing ofxBloom
-    // Has no effect on ofxGaussianBlur.
-    // If 15, will make ofxBokeh draw nothing.
-    fx_effect.setRadius(1.5);
-
-    draw_rect_to_fbo_and_update_effect();
  } 
 
 //--------------------------------------------------------------
 void ofApp::draw(){
 
-    /* draw_rect_to_fbo_and_update_effect(); */
+    draw_rect_to_fbo_and_update_effect();
 
-    // We use a dark red background to easily see what we have painted ourselves.
-    // Sandbox-example uses a black background. That changes nothing.
-    ofBackground(70,35,35);
-    /* ofBackground(0); */
+    ofBackgroundGradient(ofColor(0), ofColor(255), OF_GRADIENT_LINEAR);
+    ofSetColor(0);
+    ofRect(0,height/2,width*3,height/2);
 
-    // This outputs the rectangle properly.
-    /* render_buffer.draw(0, 0, width, height); */
-
-    // This outputs the rectangle properly, so we know that the effect's textures[0]
-    // is set to contain the render_buffer ofFbo's contents properly.
-    fx_effect[0].draw(0, 0, width, height);
-
-    // These things are set in the sandbox-example. Removing them produces identical results.
-    ofPushStyle();
-    ofEnableBlendMode(OF_BLENDMODE_ALPHA);
+    // This must be called for fbo.draw calls to work. We're probably in
+    // some alpha blending mode of some sort. Idk.
     ofSetColor(255);
 
-    // ofxBokeh:
-    // Will draw nothing in top left, top right and bottom left quadrants.
-    // Will draw black pixels in lower right quadrant.
-    // ofxBloom:
-    // Draws a desaturated square in the lower right quadrant.
-    // ofxGaussianBlur:
-    // Will fill transparent pixels (anything not painted) of the fbo with black.
-    // Will draw the fbo unchanged.
-    // Will draw black pixels on the lower right quadrant afterwards.
-    fx_effect.draw(0, 0, width, height);
+    // Left, directly from fbo. This works nicely.
+    render_buffer.draw(0, 0, width, height);
 
-    // Also from sandbox-example.
-    ofPopStyle();
+    // Middle, from the fbo's texture as drawn to one of fx_pass's fbos
+    fx_pass[0].draw(width, 0, width, height);
+
+    // Right, with fx_pass's shader applied.
+    fx_pass.draw(width*2, 0, width, height);
+
+    // All of these should look exactly the same.
 }
 
 //--------------------------------------------------------------
